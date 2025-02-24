@@ -13,6 +13,8 @@ const { type } = require("os");
 const { log } = require("console");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
+const path = require("path");
+const fs = require("fs");
 // const bodyParser = require("body-parser");
 
 
@@ -85,11 +87,18 @@ app.get("/",(req,res)=>{
 })
 
 // Image Storage Engine
+const uploadPath = '/tmp/upload';
+
+if (!fs.existsSync(uploadPath)) {
+  fs.mkdirSync(uploadPath, { recursive: true });
+}
 
 const storage = multer.diskStorage({
-    destination:'./upload/images',
+    destination:function (req, file, cb) {
+     cb(null, uploadPath);
+    },
     filename:(req,file,cb)=>{
-        return cb(null,`${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`)
+     return cb(null,`${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`)
     }
 })
 
