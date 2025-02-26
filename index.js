@@ -94,9 +94,10 @@ if (!fs.existsSync(uploadPath)) {
 }
 
 const storage = multer.diskStorage({
-    destination:function (req, file, cb) {
-     cb(null, uploadPath);
-    },
+    // destination:function (req, file, cb) {
+    //  cb(null, uploadPath);
+    // },
+    destination:uploadPath,
     filename:(req,file,cb)=>{
      return cb(null,`${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`)
     }
@@ -107,27 +108,15 @@ const upload = multer({storage:storage})
 // Creating Upload Endpoint for images
 app.use('/images',express.static('temp/upload'))
 
-// app.post("/upload",upload.single('product'),(req,res)=>{
-//     console.log("req",req);
-//   try {
-//     res.json({
-//         success:1,
-//         image_url:`https://backend-harsh-shopper.vercel.app/images/${req.file.filename}`
-//     })
-//   } catch (error) {
-//    res.send(error) 
-//   }
-// })
-app.post("/upload",(req,res)=>{
+app.post("/upload",upload.single('product'),(req,res)=>{
     console.log("req",req);
   try {
     res.json({
         success:1,
-        // image_url:`https://backend-harsh-shopper.vercel.app/images/${req.file.filename}`
-        image_url:`https://backend-harsh-shopper.vercel.app/images`
+        image_url:`https://backend-harsh-shopper.vercel.app/images/${req.file.filename}`
     })
   } catch (error) {
-   res.send(error) 
+   res.send(error.toString()); 
   }
 })
 
