@@ -10,11 +10,11 @@ const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
 const cloudinary = require("cloudinary").v2;
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 // const path = require("path");
 const fs = require("fs");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 // const bodyParser = require("body-parser");
 
 
