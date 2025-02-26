@@ -87,7 +87,7 @@ app.get("/",(req,res)=>{
 })
 
 cloudinary.config({
-    cloud_name: "Shopper",
+    cloud_name: "dhfydiarj",
     api_key: "374841696912698",
     api_secret: "OnQbjahABG6NOj3r4jW3f85059c"
 });
