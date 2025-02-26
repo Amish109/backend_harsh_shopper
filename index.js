@@ -380,7 +380,14 @@ const fetchUser = async (req,res,next)=>{
         let userData = await Users.findOne({_id:req.user.id});
         res.json(userData.cartData);
     })
-
+    app.delete("/product-image-delete",async(req,res)=>{
+        const data =await cloudinary.uploader.destroy(req.body.public_id);
+        res.send({
+            data,
+            msg:"Test delete"
+        })
+        // https://res.cloudinary.com/dhfydiarj/image/upload/v1740607144/uploads/product_1740607143999.png
+    })
 
 app.listen(port,(error)=>{
     if (!error) {
