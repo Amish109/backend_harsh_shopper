@@ -112,7 +112,7 @@ app.post("/upload",upload.single('product'),(req,res)=>{
   try {
     res.json({
         success:1,
-        image_url:`http://localhost:${port}/images/${req.file.filename}`
+        image_url:`https://backend-harsh-shopper.vercel.app/images/${req.file.filename}`
     })
   } catch (error) {
    res.send(error) 
