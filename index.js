@@ -106,16 +106,21 @@ const upload = multer({storage:storage})
 
 // Creating Upload Endpoint for images
 
-app.post("/upload",upload.single('product'),async (req,res)=>{
+app.post("/upload", upload.single("product"), async (req, res) => {
     try {
-        const result = await cloudinary.uploader.upload_stream({ folder: "products" }, async (error, result) => {
-            if (error) return res.status(500).json({ success: false, error: error.message });
-            res.json({ success: true, image_url: result.secure_url, public_id: result.public_id });
-        }).end(req.file.buffer);
+        if (!req.file) {
+            return res.status(400).json({ success: false, error: "No file uploaded" });
+        }
+
+        console.log("File received:", req.file);
+
+        // Cloudinary already handles upload through Multer
+        res.json({ success: true, image_url: req.file.path, public_id: req.file.filename });
+
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
-})
+});
 
 
 
