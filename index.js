@@ -107,12 +107,24 @@ const upload = multer({storage:storage})
 // Creating Upload Endpoint for images
 app.use('/images',express.static('temp/upload'))
 
-app.post("/upload",upload.single('product'),(req,res)=>{
-    console.log("req",req)
+// app.post("/upload",upload.single('product'),(req,res)=>{
+//     console.log("req",req);
+//   try {
+//     res.json({
+//         success:1,
+//         image_url:`https://backend-harsh-shopper.vercel.app/images/${req.file.filename}`
+//     })
+//   } catch (error) {
+//    res.send(error) 
+//   }
+// })
+app.post("/upload",(req,res)=>{
+    console.log("req",req);
   try {
     res.json({
         success:1,
-        image_url:`https://backend-harsh-shopper.vercel.app/images/${req.file.filename}`
+        // image_url:`https://backend-harsh-shopper.vercel.app/images/${req.file.filename}`
+        image_url:`https://backend-harsh-shopper.vercel.app/images`
     })
   } catch (error) {
    res.send(error) 
