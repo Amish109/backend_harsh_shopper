@@ -9,8 +9,8 @@ const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
-const { type } = require("os");
-const { log } = require("console");
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 // const path = require("path");
@@ -86,38 +86,35 @@ app.get("/",(req,res)=>{
     res.send("Express app is running")
 })
 
-// Image Storage Engine
-const uploadPath = '/tmp/upload';
+cloudinary.config({
+    cloud_name: "Shopper",
+    api_key: "374841696912698",
+    api_secret: "OnQbjahABG6NOj3r4jW3f85059c"
+});
 
-if (!fs.existsSync(uploadPath)) {
-  fs.mkdirSync(uploadPath, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-    // destination:function (req, file, cb) {
-    //  cb(null, uploadPath);
-    // },
-    destination:uploadPath,
-    filename:(req,file,cb)=>{
-     return cb(null,`${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`)
-    }
-})
+// Set up Multer Storage
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: "uploads", // Change this to your desired folder
+        format: async (req, file) => "png", // Convert to PNG
+        public_id: (req, file) => file.fieldname + "_" + Date.now(),
+    },
+});
 
 const upload = multer({storage:storage})
 
 // Creating Upload Endpoint for images
-app.use('/images',express.static('temp/upload'))
 
-app.post("/upload",upload.single('product'),(req,res)=>{
-    console.log("req",req);
-  try {
-    res.json({
-        success:1,
-        image_url:`https://backend-harsh-shopper.vercel.app/images/${req.file.filename}`
-    })
-  } catch (error) {
-   res.send(error.toString()); 
-  }
+app.post("/upload",upload.single('product'),async (req,res)=>{
+    try {
+        const result = await cloudinary.uploader.upload_stream({ folder: "products" }, async (error, result) => {
+            if (error) return res.status(500).json({ success: false, error: error.message });
+            res.json({ success: true, image_url: result.secure_url, public_id: result.public_id });
+        }).end(req.file.buffer);
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
 })
 
 
@@ -138,6 +135,10 @@ const Product = mongoose.model("Product",{
         type: String,
         required: true,
     },
+    public_id: { 
+        type: String,
+        required: true
+     },
     category:{
         type: String,
         required: true,
@@ -179,6 +180,7 @@ app.post('/addproduct', async (req,res)=>{
         id:id,
         name:req.body.name,
         image:req.body.image,
+        public_id: req.body.public_id,
         category:req.body.category,
         new_price:req.body.new_price,
         old_price:req.body.old_price,
@@ -196,12 +198,14 @@ app.post('/addproduct', async (req,res)=>{
 // Creating Api For Deleting Products
 
 app.post('/removeproduct', async (req,res)=>{
-    await Product.findOneAndDelete({id:req.body.id});
-    console.log("Removed");
-    res.json({
-        success:true,
-        name:req.body.name
-    })
+    const product = await Product.findOneAndDelete({ id: req.body.id });
+
+    if (product) {
+        await cloudinary.uploader.destroy(product.public_id);
+        res.json({ success: true, message: "Product deleted successfully" });
+    } else {
+        res.status(404).json({ success: false, message: "Product not found" });
+    }
 })
 
 // Creating Api For Getting All Products
